@@ -3,93 +3,125 @@
  * @Author: Aditya Bhatia.
  * To run this file.
  * >flex Compilers_Lexical_Analyzer.lex
- * >gcc lex.yy.c -lfl
+ * gcc lex.yy.c -lfl
  * >./a.out <program code file name> <output file name>
  *
  */
 
-
+%{
+   #include "Compilers_Parser.tab.h"
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include <string.h>
+   	
+%}
 digit		[0-9]
 letter		[a-zA-Z]+
-keyword 	program|and|begin|forward|div|do|else|end|for|function|if|array|mod|not|of|or|procedure|record|then|to|type|var|while
+PROGRAM         program
+PROCEDURE	procedure
+FUNCTION	function
+TYPE		type
+VAR		var
+FORWARD		forward
+TBEGIN		begin
+END		end
+IF		if
+THEN		then
+ELSE		else
+WHILE		while
+DO		do
+TO		to
+FOR		for
+ARRAY		array
+RECORD		record
+OF		of
+INT		int
+OR		or
+MOD		mod
+AND		and
+STRING		string
+NOT		not
+PLUS   		"+"
+MINUS		"-"
+MUL		"*"
+DIV 		div
 relop	 	"="|"<"|"<="|">"|">="|"<>"
-symbols	 	"+"|"-"|"*"|"."|","|":"|";"|":="|".."|"("|")"|"["|"]"
+SEMICOLON	";"
+DOT		"."
+EQ		"="
+COLEQ		":="
+COMMA		","
+RBRACEOPEN	"("
+RBRACECLOSE	")"
+SBRACEOPEN	"["
+SBRACECLOSE	"]"
+COLON		":"
+DOUBLEDOT	".."
 
 %%
 	/*Keyword Match*/
-{keyword}			fprintf(yyout,"KEYWORD: %s\n",yytext);
-	/*String Literal Match*/
-\"{letter}*\"			fprintf(yyout,"STRING: %d %s\n",fetchIndex(yytext,yyleng),yytext);
-	/*Indentifier Match */
-{letter}({letter}|{digit}|_)*	fprintf(yyout,"ID: %d %s\n", fetchIndex(yytext,yyleng),yytext);
-	/*Number Match*/
-{digit}+			fprintf(yyout,"NUM: %d %s\n",fetchIndex(yytext,yyleng),yytext);
-	/*Relational Operator Match*/
-{relop}				fprintf(yyout,"RELOP: %s\n",yytext);
-	/*Symbols Match*/
-{symbols}			fprintf(yyout,"SYMBOL: %s\n",yytext);
+{PROGRAM}			{printresult("PROGRAM",PROGRAM);return PROGRAM;}
+{PROCEDURE}			{printresult("PROCEDURE",PROCEDURE);return PROCEDURE;}
+{FUNCTION}			{printresult("FUNCTION",FUNCTION);return FUNCTION;}
+{TYPE}				{printresult("TYPE",TYPE);return TYPE;}
+{VAR}				{printresult("VAR",VAR);return VAR;}
+{FORWARD}			{printresult("FORWARD",FORWARD);return FORWARD;}
+{TBEGIN}			{printresult("TBEGIN",TBEGIN);return TBEGIN;}
+{END}				{printresult("END",END);return END;}
+{IF}				{printresult("IF",IF);return IF;}
+{THEN}				{printresult("THEN",THEN);return THEN;}
+{ELSE}				{printresult("ELSE",ELSE);return ELSE;}
+{WHILE}				{printresult("WHILE",WHILE);return WHILE;}
+{DO}				{printresult("DO",DO);return DO;}
+{TO}				{printresult("TO",TO);return TO;}
+{FOR}				{printresult("FOR",FOR);return FOR;}
+{ARRAY}				{printresult("ARRAY",ARRAY);return ARRAY;}
+{RECORD}			{printresult("RECORD",RECORD);return RECORD;}
+{OF}				{printresult("OF",OF);return OF;}
+{OR}				{printresult("OR",OR);return OR;}
+{MOD}				{printresult("MOD",MOD);return MOD;}
+{AND}				{printresult("AND",AND);return AND;}
+{NOT}				{printresult("NOT",NOT);return NOT;}
+{PLUS}				{printresult("PLUS",PLUS);return PLUS;}
+{MINUS}				{printresult("MINUS",MINUS);return MINUS;}
+{MUL}				{printresult("MUL",MUL);return MUL;}
+{DIV}				{printresult("DIV",DIV);return DIV;}
+{SEMICOLON}			{printresult("SEMICOLON",SEMICOLON);return SEMICOLON;}
+{DOT}				{printresult("DOT",DOT);return DOT;}
+{EQ}				{printresult("EQ",EQ);return EQ;}
+{COLEQ}				{printresult("COLEQ",COLEQ);return COLEQ;}
+{COMMA}				{printresult("COMMA",COMMA);return COMMA;}
+{COLON}				{printresult("COLON",COLON);return COLON;}
+{RBRACEOPEN}			{printresult("RBRACEOPEN",RBRACEOPEN);return RBRACEOPEN;}
+{RBRACECLOSE}			{printresult("RBRACECLOSE",RBRACECLOSE);return RBRACECLOSE;}
+{SBRACEOPEN}			{printresult("SBRACEOPEN",SBRACEOPEN);return SBRACEOPEN;}
+{SBRACECLOSE}			{printresult("SBRACECLOSE",SBRACECLOSE);return SBRACECLOSE;}
+{DOUBLEDOT}			{printresult("DOUBLEDOT",DOUBLEDOT);return DOUBLEDOT;}
 
+
+	/*String Literal Match*/
+\"{letter}*\"			{fetchIndex(yytext,yyleng);printresult(yytext,STRING);return STRING;}
+	/*Indentifier Match */
+{letter}({letter}|{digit}|_)*   {yylval.id =fetchIndex(yytext,yyleng);printresult(yytext,ID);return ID;}
+	/*Number Match*/
+{digit}+			{yylval.digit = fetchIndex(yytext,yyleng);printresult(yytext,INT);return INT;}
+	/*Relational Operator Match*/
+{relop}				{printresult(yytext,RELOP);return RELOP;}
 	/*comments Match*/
-\{([^\{\}]|.|\n)*\}			;
+\{[^\}]*\}		;
+
+[\t\n]				;
 	/*Matches Default Characters*/
-.|\n				;
+.				;
 %%
 
-extern void* malloc();
-struct lexemes{
-	char *lexeme;	
-	struct lexemes* next;
-};
+int printresult(char* string,int returnvalue){
+	//fprintf(yyout,"%s--%d\n",string,returnvalue);
+	return returnvalue;
 
-struct lexemes* first = NULL;
-	/*Creates a new Node in the linked list*/
-struct lexemes* createNode(char * lex,int lexSize){
-
-	struct lexemes* temp = (struct lexemes *) malloc(sizeof(struct lexemes));
-	char * templexeme = (char *) malloc(lexSize +1);
-	strcpy(templexeme,lex);
-	temp->lexeme = templexeme;
-	temp->next = NULL;
-	return temp;
-}
-	/*Fetches the index for the lexeme in the symbol table.*/
-int fetchIndex(char *lex,int yyleng){
-	struct lexemes* temp;
-	int symbol_index;
-	if(first == NULL){
-		first = createNode(lex,yyleng);
-		return 1;
-	}else{
-		temp = first;
-		symbol_index  = 0;
-		struct lexemes* lastNode;
-		while(temp != NULL){
-			if(strcmp(temp->lexeme,lex) == 0){
-				return symbol_index + 1;
-			}else{
-				if(temp->next == NULL){
-					lastNode = temp;	
-				}
-				temp = temp->next;
-				symbol_index += 1;
-			}
-		}
-		lastNode->next = createNode(lex,yyleng);
-		return symbol_index+1;
-		
-	}
-}
-	/* Prints the symbol table linked list */
-void printSymbolTable(){
-	fprintf(yyout,"lexeme : Index\n");
-	struct lexemes* temp = first;
-	int symbol_index = 0;
-	while(temp != NULL){
-		fprintf(yyout,"%s : %d\n",temp->lexeme,++symbol_index);
-		temp = temp->next;
-	}
 }
 	/* Main Function */
+/*
 int main(int argc,char * argv[])
 {
 	if(argc==3){
@@ -105,4 +137,4 @@ int main(int argc,char * argv[])
 	fclose(yyin);
 	fclose(yyout);
 	return 0;
-}
+}*/
