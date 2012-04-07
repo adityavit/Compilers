@@ -5,7 +5,7 @@
 CC = gcc
 FLEX = flex
 CFLAG = -lfl
-LEX_FILE = Compilers_Lexical_Analyser.lex
+LEX_FILE = Compilers_Lexical_Analyzer.lex
 YACC_FILE = Compilers_Parser.y
 OUT_FILE = parser
 BISON = bison
